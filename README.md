@@ -31,7 +31,7 @@ make
 
 ### 2️⃣ Mã hóa tập tin
 ```sh
-./encrypt input.txt output.enc 256 my_secret_key
+./encrypt input.txt output.enc my_secret_key 256 
 ```
 - `input.txt`: Tệp đầu vào cần mã hóa
 - `output.enc`: Tệp đầu ra đã mã hóa
@@ -40,7 +40,7 @@ make
 
 ### 3️⃣ Giải mã tập tin
 ```sh
-./decrypt output.enc decrypted.txt 256 my_secret_key
+./decrypt output.enc decrypted.txt my_secret_key 256
 ```
 - `output.enc`: Tệp đã mã hóa
 - `decrypted.txt`: Tệp đầu ra sau khi giải mã
