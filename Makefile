@@ -39,6 +39,11 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 clean:
 	rm -rf $(BUILD_DIR) $(TEST_DIR)/*.o $(TEST_DIR)/*.d $(TEST_DIR)/*.exe encrypt decrypt
 
+# Run unit tests
+test: $(BUILD_DIR)/$(TARGET)
+	$(CC) $(CFLAGS) -o $(TEST_DIR)/test_aes $(TEST_DIR)/test_aes.c -L$(BUILD_DIR) -laes
+	$(TEST_DIR)/test_aes
+
 # Build encryption program
 encrypt: $(BUILD_DIR)/$(TARGET)
 	$(CC) $(CFLAGS) -o encrypt encrypt.c -L$(BUILD_DIR) -laes
