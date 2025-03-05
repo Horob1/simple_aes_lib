@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "../include/aes.h"
+#include <unistd.h>  // Cho ftruncate() trên Linux/macOS
+// #include <io.h>      // Cho _chsize_s() trên Windows
 /**
  * This section contains the AES S-Box and Inverse S-Box
  * The S-Box is used in the encryption process to substitute bytes
@@ -368,7 +370,7 @@ int aes_encrypt_file(const uint8_t *input_file, const uint8_t *output_file, cons
     while ((bytesRead = fread(block, 1, 16, in)) > 0) {
         if (bytesRead < 16) {
             for (size_t i = bytesRead; i < 16; i++) {
-                block[i] = 16 - bytesRead; // PKCS7 padding
+                block[i] = ' '; // PKCS7 padding
             }
         }
         for (int i = 0; i < 16; i++) {
@@ -439,6 +441,13 @@ int aes_decrypt_file(const uint8_t *input_file, const uint8_t *output_file, cons
 
         memcpy(iv, prevCipher, 16);  // Cập nhật IV từ ciphertext gốc
     }
+    //kiểm tra padding
+    int i = 15;
+    while (block[i]!= ' ' && i >= 0)
+    {
+        i--;
+    }
+    ftruncate(fileno(out), ftell(out) - (16 - i));  // Cắt bớt dữ liệu thừa
 
     fclose(in);
     fclose(out);
