@@ -26,6 +26,8 @@
 ### 1️⃣ Biên dịch thư viện
 ```sh
 make
+// Optional: make decrypt
+// make encrypt
 ```
 Điều này sẽ tạo ra thư viện `libaes.a` trong thư mục `build/`.
 
