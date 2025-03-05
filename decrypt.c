@@ -25,7 +25,11 @@ int main(int argc, char *argv[]) {
             return 1;
     }
 
-    if (aes_decrypt_file(input_file, output_file, (const uint8_t *)key, aes_key_size) == 0) {
+    if (aes_decrypt_file(
+      (const uint8_t *)input_file, 
+      (const uint8_t *)output_file, 
+      (const uint8_t *)key,
+      aes_key_size) == 0) {
         printf("Decryption successful: %s -> %s\n", input_file, output_file);
     } else {
         fprintf(stderr, "Decryption failed.\n");

@@ -10,9 +10,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    const uint8_t *input_file = argv[1];
-    const uint8_t *output_file = argv[2];
-    const uint8_t *key = argv[3];
+    const char *input_file = argv[1];
+    const char *output_file = argv[2];
+    const char *key = argv[3];
     int key_size = atoi(argv[4]);
 
     if (key_size != 128 && key_size != 192 && key_size != 256) {
@@ -37,7 +37,12 @@ int main(int argc, char *argv[]) {
     }
 
     // Mã hóa file
-    int result = aes_encrypt_file(input_file, output_file, (const unsigned char *)key, aesKeyLen);
+    int result =aes_encrypt_file(
+      (const uint8_t *)input_file, 
+      (const uint8_t *)output_file, 
+      (const uint8_t *)key, 
+      aesKeyLen
+    );
     if (result == 0) {
         printf("Encryption successful: %s\n", output_file);
     } else {

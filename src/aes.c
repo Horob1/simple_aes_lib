@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 #include "../include/aes.h"
-
 /**
  * This section contains the AES S-Box and Inverse S-Box
  * The S-Box is used in the encryption process to substitute bytes
@@ -56,13 +55,15 @@ static const uint8_t InvSbox[256] = {
  * @param targetLen The target length (AES_128, AES_192, or AES_256)
  */
 void NormalizeKey(uint8_t *key, int keyLen, AESKeyLength targetLen) {
-    if (keyLen > targetLen) {
-        key[targetLen] = '\0';
-    } else if (keyLen < targetLen) {
-        memset(key + keyLen, 0x00, targetLen - keyLen);
-        key[targetLen] = '\0';
+    if (keyLen > (int)targetLen) {
+        // Cắt bớt khóa nếu dài hơn targetLen
+        memset(key + (int)targetLen, 0, keyLen - (int)targetLen);
+    } else if (keyLen < (int)targetLen) {
+        // Padding với 0x00 nếu ngắn hơn targetLen
+        memset(key + keyLen, 0, (int)targetLen - keyLen);
     }
 }
+
 
 /**
  * Substitute bytes in the state using the S-Box
@@ -352,8 +353,9 @@ int aes_encrypt_file(const uint8_t *input_file, const uint8_t *output_file, cons
     NormalizeKey(normalizedKey, key_size, key_size);
     KeyExpansion(normalizedKey, expandedKey, key_size);
 
-    FILE *in = fopen(input_file, "rb");
-    FILE *out = fopen(output_file, "wb");
+    FILE *in = fopen((const char *)input_file, "rb");
+    FILE *out = fopen((const char *)output_file, "wb");
+
     if (in == NULL || out == NULL) {
         return -1;
     }
@@ -375,6 +377,15 @@ int aes_encrypt_file(const uint8_t *input_file, const uint8_t *output_file, cons
         AES_EncryptBlock(block, expandedKey, key_size);
         fwrite(block, 1, 16, out);
         memcpy(iv, block, 16);
+    }
+
+    if (bytesRead == 16) { 
+        memset(block, 16, 16);
+            for (int i = 0; i < 16; i++) {
+                block[i] ^= iv[i];
+            }
+        AES_EncryptBlock(block, expandedKey, key_size);
+        fwrite(block, 1, 16, out);
     }
 
     fclose(in);
@@ -400,57 +411,33 @@ int aes_decrypt_file(const uint8_t *input_file, const uint8_t *output_file, cons
     KeyExpansion(normalizedKey, expandedKey, key_size);
 
     // Mở file
-    FILE *in = fopen(input_file, "rb");
-    FILE *out = fopen(output_file, "wb");
+    FILE *in = fopen((const char *)input_file, "rb");
+    FILE *out = fopen((const char *)output_file, "wb");
+
     if (in == NULL || out == NULL) {
         return -1;
     }
 
     // Đọc IV từ đầu file mã hóa
-    uint8_t iv[16];
-    fread(iv, 1, 16, in);
+      uint8_t iv[16];
+    fread(iv, 1, 16, in);  // Đọc IV từ file
 
-    uint8_t block[16], prevCipherBlock[16];
-    memcpy(prevCipherBlock, iv, 16); // Lưu IV để sử dụng trong vòng lặp
+    uint8_t block[16], prevCipher[16];
 
     size_t bytesRead;
     while ((bytesRead = fread(block, 1, 16, in)) == 16) {
-        uint8_t decryptedBlock[16];
+        memcpy(prevCipher, block, 16);  // Lưu ciphertext trước khi giải mã
 
-        AES_DecryptBlock(block, expandedKey, key_size);
+        AES_DecryptBlock(block, expandedKey, key_size);  // Giải mã AES
 
+        // XOR với IV để khôi phục plaintext
         for (int i = 0; i < 16; i++) {
-            decryptedBlock[i] = block[i] ^ prevCipherBlock[i];
+            block[i] ^= iv[i];
         }
 
-        uint8_t nextBlock[16];
-        size_t nextBytesRead = fread(nextBlock, 1, 16, in);
+        fwrite(block, 1, 16, out);  // Ghi dữ liệu đã giải mã ra file
 
-        if (nextBytesRead == 0) { 
-            // Đây là khối cuối, xử lý padding
-            uint8_t paddingValue = decryptedBlock[15];
-
-            // Kiểm tra padding hợp lệ
-            if (paddingValue > 0 && paddingValue <= 16) {
-                for (int i = 16 - paddingValue; i < 16; i++) {
-                    if (decryptedBlock[i] != paddingValue) {
-                        fclose(in);
-                        fclose(out);
-                        return -2; // Lỗi padding
-                    }
-                }
-                fwrite(decryptedBlock, 1, 16 - paddingValue, out); // Ghi dữ liệu đã loại bỏ padding
-            } else {
-                fwrite(decryptedBlock, 1, 16, out); // Padding không hợp lệ, vẫn ghi nguyên khối
-            }
-        } else {
-            // Không phải khối cuối, ghi dữ liệu bình thường
-            fwrite(decryptedBlock, 1, 16, out);
-            fseek(in, -nextBytesRead, SEEK_CUR); // Lùi lại 16 byte để tiếp tục đọc khối tiếp theo
-        }
-
-        // Cập nhật prevCipherBlock với block hiện tại
-        memcpy(prevCipherBlock, block, 16);
+        memcpy(iv, prevCipher, 16);  // Cập nhật IV từ ciphertext gốc
     }
 
     fclose(in);
