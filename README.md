@@ -50,13 +50,14 @@ make
 ## 🛠️ API của Thư viện
 ### Mã hóa tệp tin
 ```c
-int aes_encrypt_file(const char *input_file, const char *output_file, const unsigned char *key, int key_size);
+int aes_encrypt_file(const uint8_t *input_file, const uint8_t *output_file, const uint8_t *key, AESKeyLength key_size);
+
 ```
 ### Giải mã tệp tin
 ```c
-int aes_decrypt_file(const char *input_file, const char *output_file, const unsigned char *key, int key_size);
+int aes_decrypt_file(const uint8_t *input_file, const uint8_t *output_file, const uint8_t *key, AESKeyLength key_size);
 ```
-
+(Ép kiểu về char nhé)
 ## 📝 Giấy phép
 Dự án này được phát hành theo giấy phép **MIT**. Xem tệp `LICENSE` để biết thêm chi tiết.
 
