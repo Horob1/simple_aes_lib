@@ -26,12 +26,14 @@
 ### 1️⃣ Biên dịch thư viện
 ```sh
 make
+// Optional: make decrypt
+// make encrypt
 ```
 Điều này sẽ tạo ra thư viện `libaes.a` trong thư mục `build/`.
 
 ### 2️⃣ Mã hóa tập tin
 ```sh
-./encrypt input.txt output.enc 256 my_secret_key
+./encrypt input.txt output.enc my_secret_key 256 
 ```
 - `input.txt`: Tệp đầu vào cần mã hóa
 - `output.enc`: Tệp đầu ra đã mã hóa
@@ -40,7 +42,7 @@ make
 
 ### 3️⃣ Giải mã tập tin
 ```sh
-./decrypt output.enc decrypted.txt 256 my_secret_key
+./decrypt output.enc decrypted.txt my_secret_key 256
 ```
 - `output.enc`: Tệp đã mã hóa
 - `decrypted.txt`: Tệp đầu ra sau khi giải mã
@@ -50,13 +52,14 @@ make
 ## 🛠️ API của Thư viện
 ### Mã hóa tệp tin
 ```c
-int aes_encrypt_file(const char *input_file, const char *output_file, const unsigned char *key, int key_size);
+int aes_encrypt_file(const uint8_t *input_file, const uint8_t *output_file, const uint8_t *key, AESKeyLength key_size);
+
 ```
 ### Giải mã tệp tin
 ```c
-int aes_decrypt_file(const char *input_file, const char *output_file, const unsigned char *key, int key_size);
+int aes_decrypt_file(const uint8_t *input_file, const uint8_t *output_file, const uint8_t *key, AESKeyLength key_size);
 ```
-
+(Ép kiểu về char nhé)
 ## 📝 Giấy phép
 Dự án này được phát hành theo giấy phép **MIT**. Xem tệp `LICENSE` để biết thêm chi tiết.
 
