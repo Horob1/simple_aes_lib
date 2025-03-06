@@ -370,7 +370,7 @@ int aes_encrypt_file(const uint8_t *input_file, const uint8_t *output_file, cons
     while ((bytesRead = fread(block, 1, 16, in)) > 0) {
         if (bytesRead < 16) {
             for (size_t i = bytesRead; i < 16; i++) {
-                block[i] = ' '; // PKCS7 padding
+                block[i] = ' '; // Simple space padding
             }
         }
         for (int i = 0; i < 16; i++) {
